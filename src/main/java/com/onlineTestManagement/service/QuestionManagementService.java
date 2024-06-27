@@ -34,14 +34,23 @@ public class QuestionManagementService {
         List<Options> savedOptions = questionDto.getOptions().stream().map(optionDto -> {
             Options option = new Options();
                 option.setOptionText(optionDto.getOptionText());
-            return option;
+            option.setCorrect(optionDto.isCorrect());
+            return optionRepository.save(option);
         }).collect(Collectors.toList());
+
+
+        // Find the correct option from the list of Options entities
+        Options correctOption = savedOptions.stream()
+                .filter(Options::isCorrect)
+                .findFirst()
+                .orElse(null);
+
         newQuestion.setOptions(savedOptions);
         Question savedQuestion = questionRepository.save(newQuestion);
         Answer answer = new Answer();
         answer.setQuestion(savedQuestion);
 //        answer.setOptions(savedQuestion.getOptions().getFirst());
-        answer.setCorrectOption(savedOptions.stream().filter(savedOption->savedOption.));
+        answer.setCorrectOption(correctOption);
         answerRepository.save(answer);
         return savedQuestion;
     }

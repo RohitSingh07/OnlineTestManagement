@@ -8,6 +8,6 @@ public class Options {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long optionId;
-
+    private boolean correct;
     private String optionText;
 }
