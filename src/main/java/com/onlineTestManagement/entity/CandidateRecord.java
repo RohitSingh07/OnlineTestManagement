@@ -5,7 +5,8 @@ import lombok.Data;
 
 @Entity
 @Data
-public class CustomerRecord {
+@Table(name="candidates_records")
+public class CandidateRecord {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

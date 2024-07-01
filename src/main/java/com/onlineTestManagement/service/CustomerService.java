@@ -1,17 +1,18 @@
 package com.onlineTestManagement.service;
 
-import com.onlineTestManagement.dto.CustomerRecordDto;
-import com.onlineTestManagement.entity.CustomerRecord;
-import com.onlineTestManagement.entity.Question;
-import com.onlineTestManagement.repository.CustomerRecordRepository;
-import com.onlineTestManagement.repository.OptionRepository;
-import com.onlineTestManagement.repository.QuestionRepository;
+import com.onlineTestManagement.dto.CandidateRecordDto;
+import com.onlineTestManagement.dto.OptionDto;
+import com.onlineTestManagement.dto.QuestionDto;
+import com.onlineTestManagement.entity.*;
+import com.onlineTestManagement.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class CustomerService {
@@ -20,31 +21,57 @@ public class CustomerService {
     @Autowired
     private OptionRepository optionRepository;
     @Autowired
-    private CustomerRecordRepository customerRecordRepository;
-    public List<Question> showQuestion(){
+    private CandidateRecordRepository candidateRecordRepository;
+    @Autowired
+    private CandidateDetailsRepository candidateDetailsRepository;
+    @Autowired
+    private AnswerRepository answerRepository;
+
+    public List<Question> showQuestion() {
         return Optional.of(questionRepository.findAll())
                 .filter(list -> !list.isEmpty())
                 .orElseGet(Collections::emptyList);
     }
 
-    public CustomerRecordDto addCustomerResponse(Long id, CustomerRecordDto customerRecordDto){
-        Optional<CustomerRecord> customerRecordOptional = customerRecordRepository.findById(id);
+    //    public QuestionDto addCandidateResponse(Long id, CandidateRecordDto candidateRecordDto){
+//        Optional<CandidateDetails> candidateDetailsOptional = candidateDetailsRepository.findById(id);
+//        Question question = questionRepository.findById(id)
+//                .orElseThrow(() -> new RuntimeException("Question not found with id: " + id));
+//
+//        List<OptionDto> optionDtos = question.getOptions().stream()
+//                .map(option -> {
+//                    OptionDto optionDto = new OptionDto();
+//                    optionDto.setOptionText(option.getOptionText());
+////                    optionDto.setCorrect(option.isCorrect());
+//                    return optionDto;
+//                })
+//                .collect(Collectors.toList());
+//
+//        QuestionDto questionDto = new QuestionDto();
+//        questionDto.setQuestionText(question.getQuestionText());
+//        questionDto.setOptions(optionDtos);
+//
+//        return questionDto;
+    public CandidateRecordDto addCandidateResponse(CandidateRecordDto candidateRecordDto) {
+        Question question = questionRepository.findById(candidateRecordDto.getQuestionId())
+                .orElseThrow(() -> new RuntimeException("Question not found with id: " + candidateRecordDto.getQuestionId()));
 
-        if (customerRecordOptional.isPresent()) {
-            CustomerRecord customerRecord = customerRecordOptional.get();
+        Options selectedOption = optionRepository.findById(candidateRecordDto.getSelectedOptionId())
+                .orElseThrow(() -> new RuntimeException("Option not found with id: " + candidateRecordDto.getSelectedOptionId()));
 
-//            customerRecord.setSelectedOption(customerRecordDto.getSelectedOptionId());
-            customerRecord.setCorrect(customerRecordDto.isCorrect());
-            customerRecordRepository.save(customerRecord);
-
-            CustomerRecordDto updatedCustomerRecordDto = new CustomerRecordDto();
-//            updatedCustomerRecordDto.setSelectedOptionId(customerRecord.getSelectedOption());
-            updatedCustomerRecordDto.setCorrect(customerRecord.isCorrect());
-
-            return updatedCustomerRecordDto;
+        Answer answer = answerRepository.findByCorrectOption(selectedOption);
+        CandidateRecord candidateRecord = new CandidateRecord();
+        candidateRecord.setCorrect(false);
+        if (answer != null && Objects.equals(selectedOption.getOptionId(), answer.getCorrectOption().getOptionId())) {
+            candidateRecord.setCorrect(selectedOption.isCorrect());
         }
-        else{
-        return null;
-        }
+        candidateRecord.setQuestion(question);
+        candidateRecord.setSelectedOption(selectedOption);
+        CandidateRecord savedRecord = candidateRecordRepository.save(candidateRecord);
+        CandidateRecordDto savedDto = new CandidateRecordDto();
+        savedDto.setQuestionId(savedRecord.getQuestion().getQuestionId());
+        savedDto.setCorrect(savedRecord.isCorrect());
+        savedDto.setSelectedOptionId(savedRecord.getSelectedOption().getOptionId());
+        return savedDto;
     }
 }

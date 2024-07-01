@@ -1,4 +1,3 @@
-/*
 package com.onlineTestManagement.entity;
 
 import jakarta.persistence.*;
@@ -22,4 +21,4 @@ public class CandidateDetails {
 
 
 }
-*/
+

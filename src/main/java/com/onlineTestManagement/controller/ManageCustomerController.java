@@ -1,6 +1,6 @@
 package com.onlineTestManagement.controller;
 
-import com.onlineTestManagement.dto.CustomerRecordDto;
+import com.onlineTestManagement.dto.CandidateRecordDto;
 import com.onlineTestManagement.entity.Question;
 import com.onlineTestManagement.repository.OptionRepository;
 import com.onlineTestManagement.repository.QuestionRepository;
@@ -34,16 +34,9 @@ public class ManageCustomerController {
         }}
 
     @PostMapping("/customerResponse")
-    public ResponseEntity<CustomerRecordDto> addCustomerResponse(@PathVariable Long id, @RequestBody CustomerRecordDto customerRecordDto){
+    public ResponseEntity<CandidateRecordDto> addCustomerResponse(@RequestBody CandidateRecordDto candidateRecordDto){
 
-        CustomerRecordDto updatedCustomerRecordDto = customerService.addCustomerResponse(id, customerRecordDto);
-
-        if (updatedCustomerRecordDto != null) {
-            return ResponseEntity.ok(updatedCustomerRecordDto);
-        } else {
-            return ResponseEntity.notFound().build();
-        }
-
-
+        CandidateRecordDto updatedCandidateRecordDto = customerService.addCandidateResponse(candidateRecordDto);
+        return ResponseEntity.ok(updatedCandidateRecordDto);
     }
 }
